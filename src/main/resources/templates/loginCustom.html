@@ -1,0 +1,186 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+
+        #submit_button{
+            width: 120px;
+        }
+
+
+		#bg-image{
+		background-image: url("./images/img_color_bg.JPG");
+		filter: blur(1px);
+		  -webkit-filter: blur(1px);
+		   background-position: center;
+		  background-repeat: no-repeat;
+		  background-size: cover;
+		  height: 100vh; 
+		  width: 100vw; 
+		  position: fixed;
+		  top: 0;
+		  left: 0;
+		}
+	
+	#content{
+		 position: relative;
+		 z-index: 2;
+	}
+
+	#submit_button{
+		
+	}
+
+
+
+    </style>
+</head>
+<body>
+
+    <script
+    src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js">
+    </script>
+    <script>
+	/*<![CDATA[*/
+    var app = angular.module('myApp', []);
+
+    app.factory('MockApiService', ['$q', '$http', '$timeout', '$httpParamSerializer', function($q, $http, $timeout, $httpParamSerializer) {
+        var service = {};
+
+        service.login = function(credentials) {
+           
+            var data = $httpParamSerializer({
+                username: credentials.username,
+                password: credentials.password
+            });
+
+            return $http({
+                method: 'POST',
+                url: '/loginUser',
+                data: data,
+                
+            });
+        };
+
+        return service;
+    }]);
+
+
+
+    app.controller('loginCtrl', ['MockApiService', '$scope', '$http', '$q', '$element', '$window', 
+        function(MockApiService, $scope, $http, $q, $element, $window) { 
+        $scope.user = { username: '', password: '' };
+        $scope.submitted = false; // This flag is used to control the display of error messages.
+        $scope.isLoading = false; // Tracks the loading state
+        $scope.message = '';
+
+        
+        $scope.redirectToRegister = function(){
+	
+        	$window.location.href = '/register';
+        }
+        
+        // Function to call on submit button click
+        $scope.submitForm = function() {
+            $scope.submitted = true; // Indicate that a submit attempt has been made.
+
+            var formElement = angular.element(document.getElementById('loginForm'))[0];
+            formElement.classList.add("was-validated");
+
+            //form's inputs are valid 
+            if ($scope.loginForm.$valid) {
+                $scope.isLoading = true;
+                console.log('Form is valid. Form data:', $scope.user.username, $scope.user.password);
+                //call API 
+                
+                
+                
+                
+                
+                
+                
+                /*
+
+                MockApiService.login($scope.user).then(function(response) {
+		            // Handle success
+		            console.log('Login successful', response);
+		            $scope.isLoading = false;
+		            // Perform redirection or update UI based on response
+		        }, function(error) {
+		            // Handle error
+		            console.error('Login failed', error);
+		            $scope.isLoading = false;
+		            // Show error message or handle error
+		        });
+                */
+                
+            //form's inputs are invalid 
+            } else {
+
+                var userElement = angular.element(document.getElementById('username'))[0];
+                userElement.classList.add("is-invalid");
+                var passwordElement = angular.element(document.getElementById('password'))[0];
+                passwordElement.classList.add("is-invalid");
+                console.log('Form is not valid.');
+                
+            }
+
+            
+          
+        };
+    }]);
+
+
+
+    /*]]>*/
+	</script>
+
+<div ng-app="myApp" ng-controller="loginCtrl">
+	<div id="bg-image"></div>
+
+
+
+    <div id="content" class="d-flex justify-content-center align-items-center" style="min-height: 600px;">
+        <div class="container px-5 shadow p-3 mb-5 bg-body rounded">
+            <!-- Removed ng-submit and using a plain ng-form now -->
+            <ng-form id="loginForm" name="loginForm" class="row needs-validation" novalidate>
+                <label class="mb-3 fs-3" for="username">Username</label>
+                <input class="mb-3 form-control" name="username" id="username" ng-model="user.username" required>
+                <div class="invalid-feedback" ng-show="submitted && loginForm.username.$error.required">
+                    <span>username is required.</span>
+                </div>
+                
+                
+               
+                <label class="mb-3 fs-3" for="password">Password</label>
+                <input class="mb-3 form-control" name="password" id="password" ng-model="user.password" required>
+                <div class="invalid-feedback" ng-show="submitted && loginForm.password.$error.required">
+                    <span>password is required.</span>
+                </div>
+
+                <div class="d-flex mb-3 justify-content-evenly">
+                    <!-- Using ng-click to trigger form submission logic -->
+                    <button id="submit_button" class="btn btn-primary" type="button" ng-click="submitForm()">
+                        <span ng-if="!isLoading">Submit</span>
+                        <span ng-if="isLoading">
+                            <i class="fa fa-circle-o-notch fa-spin"></i>Loading...
+                        </span>
+                    </button>
+                    <button class="btn btn-secondary" type="button" ng-click="redirectToRegister()">
+                    Register
+                    </button>
+                    <button class="btn btn-warning" type="button">Continue as Guest</button>
+                </div>
+                <div id="page_error_message" class="text-danger"  ng-if="message">{{ message }}</div>
+            </ng-form>
+        </div>
+    </div>
+</div>
+
+
+
+</body>

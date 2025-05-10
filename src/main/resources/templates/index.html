@@ -1,0 +1,206 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Welcome to the CSC326 CoffeeMaker</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+
+
+
+<style>
+
+	body{
+		height: 100vh;
+		width: 100vw;
+  		margin: 0;
+	
+	}
+
+	#bg-image{
+		background-image: url("./images/img_tone_bg.JPG");
+		filter: blur(2px);
+	  -webkit-filter: blur(2px);
+	   background-position: center;
+	  background-repeat: no-repeat;
+	  background-size: cover;
+	  height: 100vh; 
+	  width: 100vw; 
+	  position: fixed;
+	  top: 0;
+	  left: 0;
+	}
+
+	#content{
+		z-index: 2;
+		position: relative;
+	}
+
+	nav{
+		position: relative;
+		background-color: wheat;
+		border-bottom:2px solid black;
+	}
+
+	ul {
+	  list-style-type: none;
+	  margin-top: 100px;
+	}
+	
+	ul>li{
+		display:block;
+		height: 60px;
+		width: 200px;
+		border: 1px solid black;
+		background-color: wheat;
+		margin-top: 50px;
+		display: flex;           
+	    align-items: center;      
+	    justify-content: center;
+	    border-radius: 15px;
+	}
+	
+	ul>li:hover{
+		 cursor: pointer;
+
+	}
+	
+
+	a{
+		text-decoration:none;
+		color: black;
+		font-size: 20px;
+	}
+	
+	 a:hover{
+	 
+	 	color: black;
+	 }
+	
+	#user_div{
+	    position: absolute;
+	    bottom: -1px;
+	    right: 0px;
+	    margin-bottom: 10px;
+	}
+
+	button{
+		border: none;
+		border-radius: 15px;
+		height: 30px;
+		width: 120px;
+		background-color: #FFC26F;
+		border: 1px solid black;
+	}
+
+</style>
+<script
+    src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js">
+</script>
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+<script>
+	/*<![CDATA[*/
+    var app = angular.module('myApp', []);
+    
+    app.run(['$http', function($http) {
+        // Read the CSRF token and header name from the meta tags
+        var csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        var csrfHeaderName = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        // Set the CSRF token as a default header for AJAX requests
+        $http.defaults.headers.common[csrfHeaderName] = csrfToken;
+    }]);
+    
+    app.controller('IndexController', ['$scope', '$http', '$timeout', '$window', function($scope, $http, $timeout, $window) {
+    	
+    	
+    	 	$scope.userRoles = [];
+    	 	
+    	 	$scope.isManager = false;
+    	    $scope.isCustomer = false;
+    	    $scope.isBarista = false;
+
+    	    $scope.fetchUserRoles = function() {
+    	        $http.get('/api/v1/role').then(function(response) {
+    	        	var roles = response.data.roles; 
+    	        	
+    	        	$scope.isManager = roles.includes("ROLE_MANAGER");
+    	        	$scope.isCustomer = roles.includes("ROLE_CUSTOMER");
+    	        	$scope.isBarista = roles.includes("ROLE_BARISTA");
+    	        	
+    	            console.log(response);
+    	        }, function(error) {
+    	            console.error('Error fetching user roles', error);
+    	        });
+    	    };
+    	    
+    	    $scope.fetchCurrentUser = function() {
+                $http.get("/api/v1/username").then(function(response) {
+                    $scope.currentUser = response.data.username;
+                    console.log($scope.currentUser);
+                }).catch(function(error) {
+                    console.error("Error fetching current user:", error);
+                    return; // Add this line to prevent further execution
+                });
+            };
+
+    	   
+    	    $scope.fetchUserRoles();
+    	    $scope.fetchCurrentUser();
+    	
+    	
+    		$scope.redirect = function(routeName){
+
+    			$window.location.href = routeName;
+    		
+    		}
+    		
+    		
+    		$scope.logout = function() {
+    	        $http.post('/logout', {}).then(function(response) {
+    	            // Handle successful logout
+    	            $window.location.href = '/login'; 
+    	        }, function(error) {
+    	            // Handle logout error
+    	            console.error('Logout failed');
+    	        });
+    	    };
+    }]);
+    /*]]>*/
+</script>
+
+</head>
+<body>
+
+	<div ng-app="myApp" ng-controller="IndexController">
+		<div id="bg-image"></div>
+	
+		<div id="content">
+		<nav class="d-flex justify-content-between pt-3 pb-1 px-4">
+			<h1>Coffee Maker</h1>
+			<div class="me-3" id="user_div">
+				<button class="d-inline me-3" ng-click="logout()">
+					Sign out
+				</button>
+				<span id="username_div">
+					{{currentUser}}
+				</span>
+			</div>
+		</nav>
+		<div>
+			<ul class="d-flex justify-content-center flex-column align-items-center">
+				<li ng-show="isBarista" ng-click="redirect('/recipe')" ><a >Recipe</a></li>
+				<li ng-show="isBarista" ng-click="redirect('/vieworders')" ><a >View Orders</a></li>
+				<li ng-show="isManager" ng-click="redirect('/inventory')" ><a >Update Inventory</a></li>
+				<li ng-show="isManager" ng-click="redirect('/ingredient')" ><a >Add an Ingredient</a></li>
+				<li ng-show="isManager" ng-click="redirect('/orderhistory')" ><a >Order History</a></li>
+				<li ng-show="isCustomer" ng-click="redirect('/order')" ><a >Order</a></li>
+				<li ng-show="isCustomer" ng-click="redirect('/orderPickup')" ><a >Order Pickup</a></li>
+			</ul>
+		</div>
+		</div>
+	</div>
+
+</body>
+</html>

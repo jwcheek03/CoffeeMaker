@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Order History</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" href="css/bootstrap.css" />
+<link rel="stylesheet" href="css/app.css" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+</head>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+	
+	<style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #F2EBE3;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        nav {
+            position: relative;
+            background-color: #FFA43D;
+            border-bottom: 2px solid black;
+        }
+        nav ul {
+            list-style-type: none;
+        }
+        nav ul > li {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+        }
+        ul > li:hover {
+            cursor: pointer;
+        }
+        a {
+            text-decoration: none;
+            color: black;
+            font-size: 30px;
+        }
+        .container {
+            max-width: 14000px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: wheat;
+            border: 4px solid black;
+            padding: 10px;
+            border-radius: 15px;
+            margin: auto;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .container2 {
+		    max-width: 1200px; 
+		    font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+		    margin: 20px auto;
+		    padding: 20px;
+		    background-color: wheat;
+            border: 4px solid black;
+		    border-radius: 8px;
+		    box-shadow: 0 6px 10px rgba(0,0,0,0.1);
+		    display: flex;
+		    flex-direction: column;
+		    gap: 20px;
+		}
+
+.select-container {
+    width: 100%;
+}
+
+.form-select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.stats label {
+    display: block; /* Makes labels block level for better control */
+}
+
+.chart-container {
+    width: 100%;
+    padding: 10px;
+    background-color: #e9ecef;
+    border-radius: 8px;
+}
+
+.bar {
+    width: 10px;
+    background-color: #3498db;
+    margin-right: 5px;
+    transition: height 0.3s ease;
+}
+
+        .btn {
+            border-radius: 50px;
+            background-color: silver;
+            border: 1px solid black;
+        }
+        .label{
+	 	  font-family: 'Jacques Francois Shadow', cursive;
+          font-size: 125px;
+	 	  color: black;
+	 	  display: flex;
+	 	  position: relative;
+	 	  animation: moveRight 55s linear infinite;
+	 	  
+	 	}
+	 	
+	 	@keyframes moveRight {
+            from {
+                transform: translateX(-100%);
+            }
+            to {
+                transform: translateX(100%);
+            }
+        }
+	 
+	  .label #star {
+	  		position: linear;
+            margin-top: 5px; 
+            margin-left: 7px;
+            margin-right: 7px;
+     }
+     
+    </style>
+<body>
+	<script th:inline="javascript">
+         /*<![CDATA[*/
+   
+    var app = angular.module('myApp', []);
+	app.controller('orderCtrl',function($scope, $http) {
+   
+			// Function to get the current date
+		    function getCurrentDate() {
+		        var currentDate = new Date();
+		        return {
+		            year: currentDate.getFullYear(),
+		            month: currentDate.getMonth() + 1, // Months are zero-based		            
+		            day: currentDate.getDate()
+		        };
+		    }
+			
+		    $scope.logout = function() {
+    	        $http.post('/logout', {}).then(function(response) {
+    	            // Handle successful logout
+    	            $window.location.href = '/login'; 
+    	        }, function(error) {
+    	            // Handle logout error
+    	            console.error('Logout failed');
+    	        });
+    	    };
+   
+		// Function to fetch orders from the server
+		$http.get("/api/v1/orders").then(function(response) {
+			// Filter orders to include only those with status 'ORDERCLOSED'
+		    $scope.orders = response.data.filter(function(order) {
+		        return order.status === 'ORDERCLOSED';
+		    });
+		    $scope.ordersToday = [];		    
+		    $scope.ordersThisMonth = [];
+		    $scope.ordersThisYear = [];
+		    
+		   
+		    $scope.totalProfit = 0;
+	        $scope.todaysTotalProfit = 0;
+	        $scope.thisMonthsTotalProfit = 0;
+	        $scope.thisYearsTotalProfit = 0;
+	        
+	        
+            $scope.ingredientUsage = {};
+            $scope.todaysIngredientUsage = {};
+            $scope.thisMonthsIngredientUsage = {};
+            $scope.thisYearsIngredientUsage = {};
+ 
+		    
+		    $scope.currentDate = getCurrentDate();		    
+	        //sort based on when order was placed
+	        $scope.orders.forEach(function(order) {
+	        	
+	        	var orderDate = new Date(order.statusTimestamp);
+	            //if the date matches verything up to the day, add it to today's list.
+	            if (orderDate.getFullYear() === $scope.currentDate.year && 
+	                orderDate.getMonth() + 1 === $scope.currentDate.month && 
+	                orderDate.getDate() === $scope.currentDate.day) {
+	                $scope.ordersToday.push(order);	           
+	            }
+	            //if the date matches everything up to the month, add it to this month's list
+	            if (orderDate.getFullYear() === $scope.currentDate.year && 
+	                       orderDate.getMonth() + 1 === $scope.currentDate.month) {
+	                $scope.ordersThisMonth.push(order);
+	            }
+	            //if the date matches up to the year, add it to this year's list
+	            if (orderDate.getFullYear() === $scope.currentDate.year) {
+	                $scope.ordersThisYear.push(order);
+	            }
+		    
+	        });
+	        	        
+	        
+	        //used for the repeated calculations of totalprofit/ingredientUsage
+	        $scope.calculateProfitAndIngredientUsage = function(orders, totalProfit, ingredientUsage) {
+	            orders.forEach(order => {
+	                // Add up the profit
+	                totalProfit += order.recipe.price;
+	                // Add ingredients
+	                order.recipe.ingredients.forEach(ingredient => {
+	                    if (ingredient.name in ingredientUsage) {
+	                        ingredientUsage[ingredient.name] += ingredient.amount;
+	                    } else {
+	                        ingredientUsage[ingredient.name] = ingredient.amount;
+	                    }
+	                });
+	            });
+	            return totalProfit;
+	        }
+	        
+	     	// Calculate profit and ingredient usage for all orders
+	        $scope.totalProfit =  $scope.calculateProfitAndIngredientUsage($scope.orders, $scope.totalProfit, $scope.ingredientUsage);
+
+	        // Calculate profit and ingredient usage for today's orders
+	        $scope.todaysTotalProfit =  $scope.calculateProfitAndIngredientUsage($scope.ordersToday, $scope.todaysTotalProfit, $scope.todaysIngredientUsage);
+
+	        // Calculate profit and ingredient usage for this month's orders
+	        $scope.thisMonthsTotalProfit =  $scope.calculateProfitAndIngredientUsage($scope.ordersThisMonth, $scope.thisMonthsTotalProfit, $scope.thisMonthsIngredientUsage);
+
+	        // Calculate profit and ingredient usage for this year's orders
+	        $scope.thisYearsTotalProfit =  $scope.calculateProfitAndIngredientUsage($scope.ordersThisYear, $scope.thisYearsTotalProfit, $scope.thisYearsIngredientUsage); 
+            
+            
+            //Just adjusts how many times to iterate over when displaying the graph.
+            $scope.getTimeSlotArray = function() {
+            	switch($scope.selectedOption) {
+                case 'Today\'s Order History':
+                    // Need 24 hours if sorting by today
+                    return Array.from({ length: 24 }, (_, i) => i); // Hours from 0 to 23
+                case 'This Month\'s Order History':
+                    // need days of the month if sorting by month
+                    var daysInMonth = new Date($scope.currentDate.year, $scope.currentDate.month, 0).getDate();
+                    return Array.from({ length: daysInMonth }, (_, i) => i + 1); // Days from 1 to daysInMonth               
+                default:
+                	 // need months of year if sorting by year
+                    return Array.from({ length: 12 }, (_, i) => i + 1); // Months from 1 to 12
+            }
+            };
+       
+		});
+		
+		
+		//Keeps track and updates the dropdown selected option
+		$scope.selectedOption = "Today's Order History"; 
+        $scope.changeSortMethod = function(newOption) {
+            $scope.selectedOption = newOption;
+        }
+        
+        
+        $scope.getLogarithmicHeight = function(frequency) {
+            // Apply logarithmic scale to the frequency
+            return Math.log(frequency + 1) *2; // Adjust the scale factor as needed
+        };
+
+        
+        //sums up the orders in the appropriate time slot. If sorting by today, clumps all orders that are in each hour
+        $scope.getOrderFrequency = function(orderTime) {
+            switch($scope.selectedOption) {
+                case 'Today\'s Order History':
+                    // Sort by hour if viewing today's history
+                    return $scope.ordersToday.filter(order => new Date(order.statusTimestamp).getHours() === orderTime).length ; 
+                case 'This Month\'s Order History':
+                    // Sort by day if viewing this month's history
+                    return $scope.ordersThisMonth.filter(order => new Date(order.statusTimestamp).getDate() === orderTime).length ;               
+                default:
+                	 // Sort by month if viewing this year's history
+                    return $scope.ordersThisYear.filter(order => new Date(order.statusTimestamp).getMonth() + 1 === orderTime).length ;
+            }
+        };
+		
+   
+	});
+	/*]]>*/
+	
+	 </script>
+	 
+	 
+	 
+	<div layout:fragment="content" class="generic-container ng-cloak"
+		ng-app="myApp" ng-controller="orderCtrl as ctrl">
+		
+		<nav class="d-flex justify-content-between pt-3 pb-1 px-4">
+    	<h1 class="home">Coffee Maker</h1>
+		    <div class="d-flex align-items-center" style="gap: 60px;">
+		        <ul class="d-flex justify-content-center align-items-center" style="gap: 60px;">
+		            <li><a href="http://localhost:8080/inventory">Inventory</a></li>
+		            <li><a href="http://localhost:8080/ingredient">Ingredient</a></li>
+		            <li><a href="http://localhost:8080/orderhistory">History</a></li>
+		            <li><a href="http://localhost:8080">Home</a></li>
+		            <button class="d-inline me-3 inter_font" style="font-size: 20px; font-weight: 300; background-color: wheat;" ng-click="logout()">
+					Sign out
+				</button>
+		        </ul>
+		    </div>
+	</nav>
+	
+	<div class="container">
+		<!-- details for net order history -->
+		<h1>Net Order History</h1>
+
+		<label>Total Closed Orders: {{orders.length}}</label> <br /> <label>Total
+			Profit Made: ${{totalProfit}}</label>
+		<h3>Ingredient Usage:</h3>
+
+		<div ng-repeat="(ingredient, amount) in ingredientUsage">
+			<tt> {{ingredient}}: {{amount}}</tt>
+		</div>
+		
+		</div>
+		<!-- end details for net order history -->
+		<!-- dropdown for selecting sorting method -->
+		
+		<div class="container2">
+    <div class="select-container">
+        <select ng-model="selectedOption" ng-change="changeSortMethod(selectedOption)" class="form-select">
+            <option value="Today's Order History">Today's Order History</option>
+            <option value="This Month's Order History">This Month's Order History</option>
+            <option value="This Year's Order History">This Year's Order History</option>
+        </select>
+    </div>
+
+    <h1>{{ selectedOption }}</h1>
+    <div class="stats">
+        <label>Total Closed Orders: {{
+            selectedOption === 'Today\'s Order History' ? ordersToday.length :
+            selectedOption === 'This Month\'s Order History' ? ordersThisMonth.length :
+            selectedOption === 'This Year\'s Order History' ? ordersThisYear.length :
+            orders.length
+        }}</label> 
+        <br>
+        <label>Total Profit Made: ${{ 
+            selectedOption === 'Today\'s Order History' ? todaysTotalProfit :
+            selectedOption === 'This Month\'s Order History' ? thisMonthsTotalProfit :
+            selectedOption === 'This Year\'s Order History' ? thisYearsTotalProfit :
+            totalProfit
+        }}</label>
+        <br>
+        <h3>Ingredient Usage:</h3>
+        <div ng-repeat="(ingredient, amount) in
+            selectedOption === 'Today\'s Order History' ? todaysIngredientUsage :
+            selectedOption === 'This Month\'s Order History' ? thisMonthsIngredientUsage :
+            selectedOption === 'This Year\'s Order History' ? thisYearsIngredientUsage :
+            ingredientUsage">
+            <tt>{{ ingredient }}: {{ amount }}</tt>
+        </div>
+    </div>
+
+    <!-- Bar Chart Section -->
+    <div class="chart-container">
+    <h3>Graph View:</h3>
+        <div style="display: flex; align-items: end; gap: 5px;">
+            <div ng-repeat="order in getTimeSlotArray()"
+                class="bar"
+                ng-style="{'height': getLogarithmicHeight(getOrderFrequency(order)) + 'px'}"></div>
+        </div>
+    </div>
+</div>
+		
+		
+		<div class="label mt-5">
+	      	<span>Order History</span>
+	      	<span id="star">*</span>
+	      	<span>Order History</span>
+	      	<span id="star" >*</span>
+	      	<span>Order History</span>
+	      	<span id="star">*</span>
+	      	<span>Order History</span>
+	    </div>
+	
+</body>
+</html>
+

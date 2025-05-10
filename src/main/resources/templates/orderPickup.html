@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+   <title>View Orders</title>
+   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   <link rel="stylesheet" href="css/bootstrap.css" />
+   <link rel="stylesheet" href="css/app.css" />
+   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+   
+   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+   <style>
+  
+   #bg-image{
+		background-image: url("./Images/1A-Sequence.png");
+		filter: blur(1px);
+		  -webkit-filter: blur(1px);
+		   background-position: center;
+		  background-repeat: no-repeat;
+		  background-size: cover;
+		  height: 100vh;
+		  width: 100vw;
+		  position: fixed;
+		  top: 0;
+		  left: 0;
+		}
+		
+       body {
+		    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		    background-color: #F2EBE3;
+		    background-image: url('./images/img_color_bg.JPG');
+		    background-size: cover;
+		    background-position: center;
+		    background-repeat: no-repeat;
+		    margin: 0;
+		    overflow-x: hidden;
+		}
+       nav {
+           background-color: #FFA43D;
+           border-bottom: 2px solid black;
+           padding: 10px;
+           display: flex;
+           justify-content: space-between;
+       }
+       .container {
+           max-width: 800px;
+           margin: auto;
+           padding: 20px;
+           background-color: white;
+           border: 1px solid black;
+           border-radius: 5px;
+       }
+       .order-container {
+       	   font-family: 'Roboto', sans-serif;
+       	   font-size: 18px; 
+      	   font-weight: bold;
+           background-color: wheat;
+           border: 1px solid black;
+           padding: 10px;
+           border-radius: 15px;
+           margin-bottom: 10px;
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+       }
+       .order-status {
+           padding: 5px;
+           border-radius: 5px;
+           display: inline-block;
+           margin-left: 10px;
+       }
+       .order-status.ready {
+           background-color: green;
+           color: white;
+       }
+       .order-status.started {
+           background-color: yellow;
+           color: black;
+       }
+       .order-status.closed {
+           background-color: black;
+           color: white;
+       }
+       .btn {
+           border-radius: 50px;
+           background-color: silver;
+           border: 1px solid black;
+       }
+      
+   </style>
+</head>
+<body ng-app="myApp">
+   <div ng-controller="pickupOrderCtrl" class="container">
+       <nav class="d-flex justify-content-between pt-3 pb-1 px-4" ng-controller="navCtrl">
+           <h1>Order Tracker</h1>
+           <div class="d-flex align-items-center" style="gap: 60px;">
+		    </div>
+           <div class="me-3" id="user_div">
+               <button class="d-inline me-3" style="background-color:transparent;" ng-click="logout()">
+                   Sign out
+               </button>
+           </div>
+           
+       </nav>
+      
+       <!-- <div id="bg-image"></div> -->
+      
+       <div class="order-container" ng-repeat="order in orders | filter: { ownerUserName: currentUser } | filter: isOrderStatusValid">
+           <input type="checkbox" ng-model="order.selected" ng-disabled="order.status !== 'ORDERREADYFORPICKUP'">
+           <span>{{ order.id }} - {{ order.recipe.name }} ({{ order.ownerUserName }})</span>
+           <div class="order-status" ng-class="{
+               'ready': order.status === 'ORDERREADYFORPICKUP',
+               'started': order.status === 'ORDERSTARTED',
+               'closed': order.status === 'ORDERCLOSED'
+           }">
+               {{ order.status === 'ORDERREADYFORPICKUP' ? 'Order Ready for Pickup' : (order.status === 'ORDERSTARTED' ? 'Order Started' : 'Order Closed') }}
+           </div>
+       </div>
+       <button class="btn btn-primary" ng-click="pickupOrder()" ng-disabled="orders.filter(order => order.selected && order.status === 'ORDERREADYFORPICKUP').length === 0">Pickup Order</button>
+       <a href="http://localhost:8080" class="btn btn-link">Home</a>
+   </div>
+   <script>
+       var app = angular.module('myApp', []);
+       app.controller('pickupOrderCtrl', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
+           $scope.fetchOrders = function() {
+               $http.get("/api/v1/orders").then(function(response) {
+                   $scope.orders = response.data;
+               }, function(error) {
+                   console.error("Error fetching orders:", error);
+               });
+           };
+           $scope.fetchCurrentUser = function() {
+               $http.get("/api/v1/username").then(function(response) {
+                   $scope.currentUser = response.data.username;
+               }, function(error) {
+                   console.error("Error fetching current user:", error);
+               });
+           };
+         //Function to pickup an order
+           $scope.pickupOrder = function() {
+               var selectedOrders = $scope.orders.filter(function(order) {
+                   return order.selected && order.status === 'ORDERREADYFORPICKUP';
+               });
+               if (selectedOrders.length > 0) {
+                   selectedOrders.forEach(function(order) {
+                       $http.put("/api/v1/orders/" + order.id)
+                       .then(function(response) {
+                           // Handle success
+                           console.log("Order Picked Up successfully:", response.data);
+                           // Refresh the orders list
+                           $scope.fetchOrders();
+                       }).catch(function(error) {
+                           // Handle error
+                           console.error("Error Picking Up order:", error.data);
+                       });
+                   });
+               } else {
+                   console.log("No orders selected or no orders ready for pickup.");
+               }
+           };
+           $scope.isOrderStatusValid = function(order) {
+               return ['ORDERREADYFORPICKUP', 'ORDERSTARTED'].indexOf(order.status) > -1;
+           };
+           $scope.fetchOrders();
+           $scope.fetchCurrentUser();
+           $timeout(function refreshOrders() {
+               $scope.fetchOrders();
+               $timeout(refreshOrders, 5000);
+           }, 5000);
+       }]);
+       app.controller('navCtrl', ['$scope', '$http', '$window', function($scope, $http, $window) {
+           $scope.logout = function() {
+               $http.post('/logout', {}).then(function(response) {
+                   $window.location.href = '/login';
+               }, function(error) {
+                   console.error('Logout failed', error);
+               });
+           };
+       }]);
+   </script>
+</body>
+</html>
+

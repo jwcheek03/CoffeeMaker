@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <head>
+      <title>Add Inventory</title>
+     
+    
+      <meta name="_csrf" th:content="${_csrf.token}"/>
+	  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+	  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+	  <style>
+ 		body{
+		height: 100vh;
+		width: 100vw;
+  		margin: 0;
+  		overflow-x: hidden;
+	
+	}
+	
+	
+	
+	nav{
+		position: relative;
+		background-color: #FFA43D;
+		border-bottom:2px solid black;
+	}
+	
+	nav button{
+		border: none;
+		
+		height: 50px;
+		width: 150px;
+		background-color: transparent;
+		border: 1px solid black;
+	}
+	
+	nav #user_div{
+		position: relative;
+		top: 10px;
+	
+	}
+
+	ul {
+	  list-style-type: none;
+	 
+	}
+	
+	ul>li{
+		
+		display: flex;           
+	    align-items: center;      
+	    justify-content: center;
+	    font-size: 50px;
+	  
+	}
+	
+	ul>li:hover{
+		 cursor: pointer;
+
+	}
+	
+	.home:hover{
+		 cursor: pointer;
+	}
+	
+	a{
+		text-decoration:none;
+		color: black;
+		font-size: 30px;
+	}
+	
+	 a:hover{
+	 
+	 	color: black;
+	 }
+	 
+	 .label{
+	 	  font-family: 'Jacques Francois Shadow', cursive;
+          font-size: 125px;
+	 	  color: black;
+	 	  display: flex;
+	 	  position: relative;
+	 	  animation: moveRight 55s linear infinite;
+	 	 
+	 }
+	 
+	 .name{
+	 	 
+	 	 font-size: 40px;
+	 	font-weight: 100;
+	 }
+	 
+	 @keyframes moveRight {
+            from {
+                transform: translateX(-100%);
+            }
+            to {
+                transform: translateX(100%);
+            }
+        }
+	 
+	  .label #star {
+	  		position: linear;
+            margin-top: 5px; 
+            margin-left: 7px;
+            margin-right: 7px;
+     }
+ 		
+ 		
+ 		hr{
+ 			
+ 			flex: 1;
+ 			width: 100%;
+            height: 2px; 
+            margin-top: 15px; 
+            margin-left: 10px;
+            background-color: black; 
+ 			
+ 		}
+ 		
+ 		#number_button{
+ 			width: 120px;
+ 			border-radius: 15px;
+ 			background-color:black;
+ 			color: white;
+ 			height: 35px;
+ 			font-size: 20px;
+ 			text-align: center;
+ 			position: relative;
+    		right: 50px;
+ 		}
+ 		
+ 		
+ 		#modal{
+ 		
+ 			margin-left: 30px;
+ 			margin-right: 30px;
+ 			
+ 		
+ 		}
+ 		
+ 		.underline{
+ 			border-bottom: 1px solid black;
+ 			width: 100%
+ 		}
+ 		
+ 		.image-container{
+	 		background-image: url("./images/almown_cp.jpg");
+			position: relative; 
+			width: 1280px; 
+  			height: 900px;
+  			/**object-fit: cover;**/
+			background-repeat: no-repeat; 
+			/** background-position: center; **/
+    	    background-size: contain;
+		    z-index: -2;
+ 		}
+ 		
+ 		.image-container2{
+	 		background-image: url("./images/almown_cp.jpg");
+			position: relative; 
+			width: 1280px; 
+  			height: 700px;
+  			/**object-fit: cover;**/
+			background-repeat: no-repeat; 
+			/** background-position: center; **/
+    	    
+		    z-index: -2;
+ 		}
+ 		
+ 		.containerCustom{
+ 			max-width: 800px;
+ 			margin-left: 250px;
+ 			margin-right: 300px;
+ 		
+ 		}
+ 		
+ 		.line_after_title{
+ 					display:inline; flex:1; border-bottom: 1px solid black;
+		         	height: 20px;
+				    position: relative;
+				    top: 15px;
+				    margin-left: 10px;
+				    margin-right: 10px;
+ 		
+ 		}
+ 		
+ 		.hollow_button{
+ 		
+ 			width: 120px;
+ 			background-color: transparent;
+ 			border: 1px solid black;
+ 			color: none;
+ 			height: 50px;
+ 			border-radius:20px;
+ 			
+ 		
+ 		}
+ 		
+ 		input::placeholder {
+    			color: white;          
+		}
+		
+		.input_black{
+			 background-color:black;
+      		 color: white; 
+      		 text-align: center; 
+      		 border-style:none;
+      		 width: 120px;
+      		 height: 35px;
+      
+		
+		}
+		
+		
+		
+		
+ 		
+ 	</style>
+ 	 <script
+      src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Jacques+Francois+Shadow&display=swap" rel="stylesheet">
+   </head>
+  
+   <body>
+
+      <script th:inline="javascript">
+         /*<![CDATA[*/
+         
+         var app = angular.module('myApp', []);
+         
+         app.factory('CsrfTokenService', ['$http', function($http) {
+             var service = {};
+
+             service.initializeCsrf = function() {
+                 var csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                 var csrfHeaderName = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+                 // Set the CSRF token as a default header for AJAX requests
+                 $http.defaults.headers.common[csrfHeaderName] = csrfToken;
+             };
+
+             return service;
+         }]);
+         
+         app.controller('navCtrl', function($scope, $http, $q, $window) {
+        	 
+        	
+        	  
+        	 $scope.logout = function() {
+     	        $http.post('/logout', {}).then(function(response) {
+     	            // Handle successful logout
+     	            $window.location.href = '/login'; 
+     	        }, function(error) {
+     	            // Handle logout error
+     	            console.error('Logout failed');
+     	        });
+     	    };
+     	    
+     	    
+     	   $scope.redirect = function(routeName){
+
+   				$window.location.href = routeName;
+   		
+   			}
+        	 
+         });
+         
+         
+         app.controller('recipesCtrl', function($scope, $http, $q) {
+         
+         	/*Gets all ingredients currently in database and stores in $scope.ingredients.
+         	Used for displaying ingredients
+         	*/
+         	$http.get("/api/v1/inventory").then(function(response) {
+         		$scope.inventory = response.data;
+         		$scope.ingredients = $scope.inventory.ingredients;
+         	});
+         	
+         	
+         	
+         	$scope.reset = function() {
+                    $scope.ingredients.forEach(function(ingredient) {
+                        ingredient.addition = '';
+                    });
+                    $scope.submissionSuccess = false;
+                    $scope.submissionFailure = false;
+                    $scope.error = "";
+            	}
+         
+         
+         	
+         	$scope.addInventory = function() {
+         		
+         		/*This looks at each ingredient. 
+         		*/
+         		var addedIngredients = $scope.ingredients.map((i) => {													 					 			
+         			if(!(/^\d+$/.test(i.addition))){
+      					i.addition = null																			
+      				}	 									
+       				var amountToAdd = parseFloat(i.addition);
+      				if (isNaN(amountToAdd)|| amountToAdd <0) {         				
+         				i = null;
+         				return;
+                	 }
+        			 return {	
+         			 	id: i.id,
+         			 	name : i.name,
+         			 	amount : amountToAdd,						
+         			}						
+         		}).filter(i => i !== null);
+         	
+         		
+         		/*This recreates an inventory json object to send to the http request*/
+         		var newInventory = {
+         			ingredients : addedIngredients,
+         		}
+         						         		
+         	 $http.put("/api/v1/inventory", newInventory).then(function(response) {
+         			// Handle success
+         			console.log(response.data);
+         			$scope.submissionSuccess = true;
+         			
+         			
+         			$http.get("/api/v1/inventory").then(function(response) {
+         				$scope.inventory = response.data;
+         				$scope.ingredients = $scope.inventory.ingredients;
+         			});
+         		}, function(errResponse) {
+         			// Handle error
+         			console.error(errResponse.data);
+         			$scope.submissionFailure = true;
+         			$scope.error = "Error while updating inventory";
+         		}); 
+         		$scope.reset();
+         	};
+         	
+         });
+         
+         /*]]>*/
+      </script>
+      
+      
+      
+      <div ng-app="myApp">
+	     <nav class="d-flex justify-content-between pt-2 px-4" ng-controller="navCtrl">
+			<h1 class="home" ng-click="redirect('/')">Coffee Maker</h1>
+			
+			
+			<div class="d-flex align-items-center" style="gap: 60px; margin-bottom: 10px;">
+				<ul class="d-flex justify-content-center align-items-center" style="gap: 60px; position: relative; top: 10px;">
+					<li><a href="http://localhost:8080/inventory">Inventory</a></li>
+		            <li><a href="http://localhost:8080/ingredient">Ingredient</a></li>
+		            <li><a href="http://localhost:8080/orderhistory">History</a></li>
+		            <li><a href="http://localhost:8080">Home</a></li>
+				</ul>
+				<button class="d-inline me-3 inter_font" style="font-size: 20px; font-weight: 300;" ng-click="logout()">
+					Sign out
+				</button>
+		
+			</div>
+		</nav>
+		
+		
+	<!--  
+      <div class="image-container"></div>
+      <div class="image-container2"></div>
+      
+      <div style=" position: absolute; width: 340px; 
+  		height: 400px; background-repeat: no-repeat; z-index: -2; top:650px;" >
+    
+      	<img src="./images/marc.jpg" style=" object-fit: cover;
+			  width:100%; 
+			  height:100%;"	>
+      </div>
+      
+      <div style=" position: absolute; width: 340px; 
+  		height: 400px; background-repeat: no-repeat; z-index: -2; top:1450px; right: 0px;" >
+    
+      	<img src="./images/marc.jpg" style=" object-fit: cover;
+			  width:100%; 
+			  height:100%;"	>
+      </div>
+      
+	-->
+			
+  		
+    	    
+		   
+      
+      <div class="d-flex justify-content-center flex-column" style="position:absolute; top: 100px;">
+      
+      
+	      <div class="label my-1">
+	      	<span>Inventory</span>
+	      	<span id="star">*</span>
+	      	<span>Inventory</span>
+	      	<span id="star" >*</span>
+	      	<span>Inventory</span>
+	      	<span id="star">*</span>
+	      	<span>Inventory</span>
+	      </div>
+	      
+	      
+	      
+	      <div layout:fragment="content"
+	          ng-controller="recipesCtrl">
+	          
+	          
+	         <div class="containerCustom mt-5 pb-3" style="background-color:#F2EBE3; border: 1px solid black;">
+	         
+	         	<div class="d-flex mb-5">
+	         	
+		         	 <h1 class="ms-5 ps-2 mb-5 mt-2 d-inline">Current Inventory</h1>
+			         <div style="display:inline; flex:1; border-bottom: 1px solid black;
+			         	height: 20px;
+					    position: relative;
+					    top: 15px;
+					    margin-left: 10px;
+					    margin-right: 10px;
+			         "></div>
+	         	</div>
+	         	<div id="modal" class="px-5">
+	         	
+		         <div class="container d-flex flex-column ">
+		            <div ng-repeat="ingredient in ingredients track by $index">
+		            
+		               <div class="d-flex justify-content-between align-items-center">
+			               <!--<tt> "{{ingredient.name}}"</tt>  -->
+			               <div class="ms-4 name"> " {{ingredient.name}} "</div>
+			               <div id="number_button"> {{ingredient.amount}}</div>
+		               </div>
+		               <div class="underline"></div>
+		               
+		            </div>
+		         </div>
+	         	</div>
+	         
+	         </div> 
+	         
+	         
+	         <div class="containerCustom pb-3" style="margin-top: 150px; background-color:#F2EBE3; border: 1px solid black;">
+	         
+		         <div class="d-flex mb-5">
+		         	<h1 class="ms-5 ps-2 mb-5 mt-2 d-inline" >Add Inventory</h1>
+		         	<div class="line_after_title"></div>
+		         </div>
+		         
+		         <div id="modal" class="px-5">
+			         <div class="container d-flex flex-column ">
+			         
+			            <div ng-repeat="ingredient in ingredients track by $index">
+			             <div class="d-flex justify-content-between align-items-center">
+			               <div class="ms-4 name"> " {{ingredient.name}} "</div>
+			               <input type="text" placeholder="amount" class="input_black"
+			                  ng-model="ingredient.addition" required
+			                  
+			                  >
+			              </div>
+			               <div class="underline"></div>
+			            </div>
+			            
+				         <div  class="d-flex justify-content-between align-items-center mt-5">
+				            <input type="submit" ng-click="addInventory()" value="Add"
+				               class="hollow_button" /> 
+				            <input type="reset" ng-click="reset()" value="Reset"
+				             class="hollow_button" />
+				         </div>
+				         
+			         </div>
+		         </div>
+		         
+	         </div>
+	         
+	         <div ng-show="submissionSuccess || submissionFailure" 
+	         class="containerCustom mt-4 pb-3 d-flex justify-content-center" style="background-color:#F2EBE3; border: 1px solid black;" >
+	         
+	         	<div style="background-color:black;" class="px-3 py-3 mt-2 ">
+		         	<div ng-show="submissionSuccess" class="success" style="color:white;">
+			         	Inventory added successfully
+			         </div>
+				     <div ng-show="submissionFailure" style="color:white;">{{error}}</div>
+	         	</div>
+	         </div>
+	         
+	          <div class="label my-1">
+		      	<span>Inventory</span>
+		      	<span id="star">*</span>
+		      	<span>Inventory</span>
+		      	<span id="star" >*</span>
+		      	<span>Inventory</span>
+		      	<span id="star">*</span>
+		      	<span>Inventory</span>
+		      </div>
+	         
+	      </div>
+      
+      
+      
+      
+      </div>
+      
+      
+      </div>
+      
+      
+   </body>
+</html>

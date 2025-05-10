@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Order a Beverage</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #F2EBE3;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0;
+            overflow-x: hidden;
+        }
+      
+        
+        
+        nav{
+		position: relative;
+		background-color: #FFA43D;
+		border-bottom:2px solid black;
+	}
+
+	nav ul {
+	  list-style-type: none;
+	 
+	}
+	
+	nav ul>li{
+		
+		display: flex;           
+	    align-items: center;      
+	    justify-content: center;
+	    font-size: 50px;
+	  
+	}
+	
+	ul>li:hover{
+		 cursor: pointer;
+
+	}
+	
+
+	a{
+		text-decoration:none;
+		color: black;
+		font-size: 30px;
+	}
+        .container {
+            max-width: 800px;
+            font-family: 'Roboto', sans-serif;
+       	   font-size: 14px; 
+      	   font-weight: bold;
+      	   background-color: wheat;
+           border: 1px solid black;
+           padding: 10px;
+           border-radius: 15px;
+           margin-bottom: 10px;
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+            margin: auto;
+            padding: 20px;
+        }
+        .btn {
+            border-radius: 50px;
+            background-color: silver;
+            border: 1px solid black;
+        }
+        .image-container{
+	 		background-image: url("./images/img_color_bg.JPG");
+			position: relative; 
+			width: 1280px; 
+  			height: 900px;
+  			/**object-fit: cover;**/
+			background-repeat: no-repeat; 
+			/** background-position: center; **/
+    	    background-size: contain;
+		    z-index: -2;
+ 		}
+ 		
+ 		.image-container{
+	 		background-image: url("./images/almown_cp.jpg");
+			position: relative; 
+			width: 1280px; 
+  			height: 900px;
+  			/**object-fit: cover;**/
+			background-repeat: no-repeat; 
+			/** background-position: center; **/
+    	    background-size: contain;
+		    z-index: -2;
+ 		}
+ 		
+ 		.containerCustom{
+ 			max-width: 800px;
+ 			margin-left: 250px;
+ 			margin-right: 300px;
+ 		
+ 		}
+ 		
+ 		 .label{
+	 	  font-family: 'Jacques Francois Shadow', cursive;
+          font-size: 125px;
+	 	  color: black;
+	 	  display: flex;
+	 	  position: relative;
+	 	  animation: moveRight 55s linear infinite;
+	 	 
+	 }
+	 
+	 .name{
+	 	 
+	 	 font-size: 40px;
+	 	font-weight: 100;
+	 }
+	 
+	 @keyframes moveRight {
+            from {
+                transform: translateX(-100%);
+            }
+            to {
+                transform: translateX(100%);
+            }
+        }
+	 
+	  .label #star {
+	  		position: linear;
+            margin-top: 5px; 
+            margin-left: 7px;
+            margin-right: 7px;
+     }
+ 		
+ 		
+ 		
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Jacques+Francois+Shadow&display=swap" rel="stylesheet">
+</head>
+<body ng-app="myApp">
+
+
+
+
+
+    <nav class="d-flex justify-content-between pt-3 pb-1 px-4" ng-controller="navCtrl">
+           <h1 class="home" ng-click="redirect('/')">Coffee Maker</h1>
+           <!--  <div class="me-3" id="user_div">
+               <button class="d-inline me-3" style="background-color:transparent;" ng-click="logout()">
+                   Sign out
+               </button>
+           </div>-->
+           <div class="d-flex align-items-center" style="gap: 60px; margin-bottom: 10px;">
+				<ul class="d-flex justify-content-center align-items-center" style="gap: 60px; position: relative; top: 10px;">
+					<li ng-click="redirect('/order')" ><a >Order</a></li>
+					<li ng-click="redirect('/orderPickup')" ><a >Order Pickup</a></li>
+					<li><a href="http://localhost:8080">Home</a></li>
+				</ul>
+				<button class="d-inline me-3 inter_font" style="font-size: 20px; font-weight: 300;" ng-click="logout()">
+					Sign out
+				</button>
+		
+			</div>
+    </nav>
+    <div class="image-container"></div>
+    
+       
+        <!-- <div class="image-container"></div> -->
+        
+    <div class="d-flex justify-content-center flex-column" style="position:absolute; top: 100px;">
+    	<div class="containerCustom mt-5 pb-3" style="background-color:#F2EBE3; border: 1px solid black;" ng-controller="orderCtrl">
+	        <h1>Select Order</h1>
+	        <form name="orderForm" ng-submit="createOrder">
+	            <div class="form-group">
+	                <label>Available Recipes:</label>
+	                <ul>
+	                    <li ng-repeat="recipe in recipes">
+	                        <label>
+	                            {{ recipe.name }} - ${{ recipe.price }}
+	                            <input type="radio" ng-model="$parent.selectedRecipe" ng-value="recipe" name="selectedRecipe" required />
+	                        </label>
+	                    </li>
+	                </ul>
+	            </div>
+	            <br /> <label for="amtPaid">Enter Payment</label> <input type="text"
+	                    ng-model="amtPaid" name="amtPaid" required="true" /> <br /> <input
+	                    type="submit" ng-click="createOrder()" value="Place Order"
+	                    class="btn btn-primary btn-sm" /> <br />
+	            <div ng-show="orderSuccess" class="success">Order was
+	                    placed. Your change is ${{change}}.</div>
+	            <div ng-show="orderFailure">An error occurred: {{error}}</div>
+	           
+	        </form>
+	    </div>
+	    
+	    <div class="label mt-5">
+	      	<span>Order</span>
+	      	<span id="star">*</span>
+	      	<span>Order</span>
+	      	<span id="star" >*</span>
+	      	<span>Order</span>
+	      	<span id="star">*</span>
+	      	<span>Order</span>
+	    </div>
+	    
+    
+    </div>
+    <footer class="d-flex justify-content-center align-items-center pb-5 pt-4" style="background-color: #FFA43D;">
+		
+			<div class="d-flex inter_font" >
+			
+				<div  class="d-flex justify-content-start align-items-start flex-column"
+					style="position: relative; left: -80px;"
+				>
+					<div class="mb-2" style="font-weight: bold;" >About</div>
+					<div>About</div>
+					<div>Submit an issue</div>
+					<div>Slack</div>
+				</div>
+				
+				<div  class="d-flex justify-content-start align-items-start flex-column">
+					<div class="mb-2" style="font-weight: bold;">Getting Started</div>
+					<div>Introduction</div>
+					<div>Documentation</div>
+					<div>Usage</div>
+					<div>Globals</div>
+				</div>
+				
+				<div  class="d-flex justify-content-start align-items-start flex-column"
+					style="position: relative; right: -80px;"
+				>
+					<div class="mb-2" style="font-weight: bold;">Resource</div>
+					<div>ApI</div>
+					<div>Form</div>
+					<div>Visibility</div>
+					<div>Accessibility</div>
+					<div>Community</div>
+					<div>Design Defined</div>
+				</div>
+			
+			</div>
+		
+		</footer>
+    
+    
+    
+    <script>
+    
+    
+        var app = angular.module('myApp', []);
+        app.controller('orderCtrl', function($scope, $http, $q) {
+
+            // Function to fetch recipes from the server
+            $http.get("/api/v1/recipes").then(function(response) {
+                $scope.recipes = response.data;
+            });
+            
+            $scope.fetchCurrentUser = function() {
+                $http.get("/api/v1/username").then(function(response) {
+                    $scope.currentUser = response.data.username;
+                }, function(error) {
+                    console.error("Error fetching current user:", error);
+                });
+            };
+            
+            $scope.fetchCurrentUser();
+
+            // Function to create an order
+            $scope.createOrder = function() {
+            	
+            	
+            	var totalPrice = $scope.selectedRecipe.price;
+            	
+            	
+            	if ($scope.amtPaid >= totalPrice) {
+            		var orderData = {
+                            recipe: $scope.selectedRecipe,
+                            ownerUserName: $scope.currentUser
+                        };
+            		
+            		console.log(orderData);
+            		
+            		$http.post("/api/v1/orders", orderData)
+                    .then(function(response) {
+                        // Handle success
+                        $scope.orderSuccess = true;
+                        $scope.orderFailure = false;
+                        $scope.change = $scope.amtPaid - totalPrice;
+                    }, function(error) {
+                        // Handle error
+                        $scope.orderSuccess = false;
+                        $scope.orderFailure = true;
+                        $scope.error = error.data;
+                    });
+            	}
+            	
+            	else {
+            		$scope.orderSuccess = false;
+                    $scope.orderFailure = true;
+                    $scope.error = "Insufficient payment. Please try again.";
+            	}
+                
+            };
+        });
+        
+        app.controller('navCtrl', function($scope, $http, $q, $window) {
+       	 
+        	
+      	  
+       	 $scope.logout = function() {
+    	        $http.post('/logout', {}).then(function(response) {
+    	            // Handle successful logout
+    	            $window.location.href = '/login'; 
+    	        }, function(error) {
+    	            // Handle logout error
+    	            console.error('Logout failed');
+    	        });
+    	    };
+    	    
+    	    
+    	   $scope.redirect = function(routeName){
+
+  				$window.location.href = routeName;
+  		
+  			}
+       	 
+        });
+        
+        
+    </script>
+</body>
+</html>

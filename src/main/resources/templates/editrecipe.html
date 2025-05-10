@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <head>
+      <title>Edit a Recipe</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <link rel="stylesheet" href="css/bootstrap.css" />
+      <link rel="stylesheet" href="css/app.css" />
+   </head>
+   <script
+      src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+   <body>
+      <script th:inline="javascript">
+         /*<![CDATA[*/
+         
+    var app = angular.module('myApp', []);
+	app.controller('editRecipesCtrl',function($scope, $http) {
+         
+        	/*Gets all ingredients currently in database and stores in $scope.ingredients.
+        	Used for displaying ingredients to select which ones to add to recipe
+          	*/						
+         $http.get("/api/v1/inventory").then(function(response) {
+         		$scope.inventory = response.data;
+         		$scope.ingredients = $scope.inventory.ingredients;
+         										
+         });
+         																															
+         $http.get("/api/v1/recipes").then(
+         	function(response) {
+         	$scope.recipes = response.data;
+         });														
+         												
+         $scope.selectRecipe = null;
+         $scope.selectRecipe = function(recipeName) {									
+         	$scope.recipes.forEach(function(recipe) {								
+         		if(recipe.name != recipeName){
+         			recipe.checked = false;										
+         		}																											
+       		});
+         						
+         $http.get("/api/v1/inventory").then(function(response) {
+         	$scope.inventory = response.data;
+         	$scope.ingredients = $scope.inventory.ingredients;         					         		
+         		$http.get("/api/v1/recipes/" + recipeName).then(function(response) {
+         			$scope.selectedRecipe = response.data;																	         					         								         								
+         			$scope.ingredients.forEach(function(allIngredient) {
+         				allIngredient.amount = '';
+         				$scope.selectedRecipe.ingredients.forEach(function(myIngredient) {
+         					if (allIngredient.name === myIngredient.name) {
+         						allIngredient.amount = myIngredient.amount;
+         						allIngredient.checked = true;
+         						allIngredient.original = true;
+         						allIngredient.id = myIngredient.id;																			
+         					}
+         				});
+         			}); 																																											
+         		},
+         		function(errResponse){									
+         			$http.get("/api/v1/recipes").then(function(response) {
+         				$scope.recipes = response.data;
+         			});	
+        			$scope.selectedRecipe = null;											
+         			console.error(errResponse.data.message);
+         			$scope.submissionFailure = true;
+         			$scope.error = "Error while editing recipe";
+         		});
+        	 });
+         								
+         
+        }                  																			
+        $scope.reset = function() {
+        	$scope.selectRecipe($scope.selectedRecipe.name);         				
+        	$scope.submissionSuccess = false;
+        	$scope.submissionFailure = false;
+        	$scope.error = "";
+        }         
+        $scope.editRecipe = function() {								
+        	var chosenIngredients = $scope.ingredients.filter(i => i.checked).map((i) => {        																								
+        		if(i.original){																						
+         			originalID = i.id;
+         		}else{
+         			originalID = null;
+         		}																																	
+         		if(!(/^\d+$/.test(i.amount))){
+         			i.amount = -1;																			
+         		}	 									
+         									
+         		var amountToAdd = parseFloat(i.amount);
+         		if (isNaN(amountToAdd)|| amountToAdd <0) {
+         			i = null;
+         			return;
+         		}
+         			 
+         									 
+         		return {	
+         			id : originalID,
+         			name : i.name,
+         			amount : amountToAdd,						
+         		}						
+         							
+         	});
+         
+         						
+         	var newPrice = $scope.selectedRecipe.price;
+       		if(!(/^\d+$/.test($scope.selectedRecipe.price))){
+         		newPrice = -1;																			
+       		}	         						         
+         	var recipe = {
+         		id : $scope.selectedRecipe.id,
+       			name : $scope.selectedRecipe.name,
+       			price : newPrice,
+       			ingredients : chosenIngredients,
+       		}      
+         	$http.put("/api/v1/recipes/"+ $scope.selectedRecipe.name,recipe).then(function(response) {
+         		// Handle success																															
+         		$scope.reset();
+         		console.log(response.data);
+       			$scope.submissionSuccess = true;         								
+       		},	
+       		function(errResponse) {
+				// Handle error
+				$scope.reset();
+				console.error(errResponse.data.message);
+				$scope.submissionFailure = true;
+				$scope.error = "Error while editing recipe";
+  			}); 
+         
+    	}
+         
+    });
+         /*]]>*/
+      </script>
+      <div layout:fragment="content" class="generic-container ng-cloak"
+         ng-app="myApp" ng-controller="editRecipesCtrl">
+         <h1>Coffee Recipes</h1>
+         <ul>
+            <li ng-repeat="recipe in recipes track by $index"><label>{{recipe.name}}
+               <input class="{{$parent.name}}" type="radio"
+                  ng-model="recipe.checked" value="{{recipe.name}}" required="true"
+                  ng-change="selectRecipe(recipe.name)" />
+               </label>
+            </li>
+         </ul>
+         <div ng-if="0 >= recipes.length">There are no recipes in the
+            Coffee Maker.
+         </div>
+         <div ng-if="recipes.length > 0">
+            <br />
+            <div ng-if="selectedRecipe">
+               <h2>Recipe Details</h2>
+               <!--  Textbox that gets the price of the recipe to be created. Links to price variable above. -->
+               <div>
+                  <label for="price">Price</label> <input type="text"
+                     ng-model="selectedRecipe.price" name="price" required>
+               </div>
+               <p>
+                  <strong>Ingredients:</strong>
+               </p>
+               <div ng-repeat="ingredient in ingredients track by $index">
+                  <tt> {{ingredient.name}}</tt>
+                  <input type="checkbox" ng-model="ingredient.checked"> <input
+                     type="text" placeholder="Enter amount of {{ingredient.name}}"
+                     ng-model="ingredient.amount" required>
+               </div>
+               <!--  Submit button to call the addRecipe() function above -->
+               <div>
+                  <input type="submit" ng-click="editRecipe()" value="Edit Recipe"
+                     class="btn btn-primary btn-sm" /> <input type="reset"
+                     ng-click="reset()" value="Reset" class="btn btn-primary btn-sm" />
+                  <div ng-show="submissionSuccess" class="success">System:
+                     Recipe edited successfully.
+                  </div>
+                  <div ng-show="submissionFailure">System: {{error}}</div>
+               </div>
+            </div>
+         </div>
+         <a href="/index">Home</a>
+      </div>
+   </body>
+</html>
